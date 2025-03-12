@@ -189,4 +189,29 @@ thirdparty
 configs/my
 /approuter
 /mta_archives
-/webbi
+
+#web
+# dependencies
+/webbi/node_modules
+/webbi/yarn.lock
+
+.idea
+# next.js
+/webbi/.next/
+/webbi/out/
+
+# production
+/webbi/build
+
+# debug
+/webbi/npm-debug.log*
+/webbi/yarn-debug.log*
+/webbi/yarn-error.log*
+
+# local env files
+/webbi/.env.prod
+/webbi/.env
+
+# typescript
+*.tsbuildinfo
+/webbi/next-env.d.ts
