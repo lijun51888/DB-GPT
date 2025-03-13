@@ -157,29 +157,29 @@ thirdparty
 
 #web
 # dependencies
-/web/node_modules
-/web/yarn.lock
+/web*/node_modules
+/web*/yarn.lock
 
 .idea
 # next.js
-/web/.next/
-/web/out/
+/web*/.next/
+/web*/out/
 
 # production
-/web/build
+/web*/build
 
 # debug
-/web/npm-debug.log*
-/web/yarn-debug.log*
-/web/yarn-error.log*
+/web*/npm-debug.log*
+/web*/yarn-debug.log*
+/web*/yarn-error.log*
 
 # local env files
-/web/.env.prod
-/web/.env
+/web*/.env.prod
+/web*/.env
 
 # typescript
 *.tsbuildinfo
-/web/next-env.d.ts
+/web*/next-env.d.ts
 
 # Ignore awel DAG visualization files
 /examples/**/*.gv
@@ -189,29 +189,3 @@ thirdparty
 configs/my
 /approuter
 /mta_archives
-
-#web
-# dependencies
-/webbi/node_modules
-/webbi/yarn.lock
-
-.idea
-# next.js
-/webbi/.next/
-/webbi/out/
-
-# production
-/webbi/build
-
-# debug
-/webbi/npm-debug.log*
-/webbi/yarn-debug.log*
-/webbi/yarn-error.log*
-
-# local env files
-/webbi/.env.prod
-/webbi/.env
-
-# typescript
-*.tsbuildinfo
-/webbi/next-env.d.ts
