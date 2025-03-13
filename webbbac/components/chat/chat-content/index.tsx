@@ -1,9 +1,17 @@
 import { ChatContext } from '@/app/chat-context';
 import { IChatDialogueMessageSchema } from '@/types/chat';
-import { CheckOutlined, ClockCircleOutlined, CloseOutlined, LoadingOutlined, RobotOutlined } from '@ant-design/icons';
+import {
+  CheckOutlined,
+  ClockCircleOutlined,
+  CloseOutlined,
+  CodeOutlined,
+  LoadingOutlined,
+  RobotOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
 import { GPTVis } from '@antv/gpt-vis';
+import { Tag } from 'antd';
 import classNames from 'classnames';
-import Image from 'next/image';
 import { PropsWithChildren, ReactNode, memo, useContext, useMemo } from 'react';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
@@ -139,29 +147,51 @@ function ChatContent({ children, content, isChartChat, onLinkClick }: PropsWithC
 
   if (!isRobot && !context) return <div className='h-12'></div>;
 
-  return !isRobot ? (
+  return (
     <div
-      className={classNames('relative flex flex-wrap w-full p-2 rounded-xl break-words', {
+      className={classNames('relative flex flex-wrap w-full p-2 md:p-4 rounded-xl break-words', {
+        'bg-white dark:bg-[#232734]': isRobot,
         'lg:w-full xl:w-full pl-0': ['chat_with_db_execute', 'chat_dashboard'].includes(scene),
       })}
     >
       <div className='mr-2 flex flex-shrink-0 items-center justify-center h-7 w-7 rounded-full text-lg sm:mr-4'>
-        {isRobot ? (
-          renderModelIcon(model_name) || <RobotOutlined />
-        ) : (
-          <div style={{ background: '#1677ff', padding: '4px', borderRadius: '50%' }}>
-            <Image src='/Vector.png' alt='' width={26} height={26} />
+        {isRobot ? renderModelIcon(model_name) || <RobotOutlined /> : <UserOutlined />}
+      </div>
+      <div className='flex-1 overflow-hidden items-center text-md leading-8 pb-2'>
+        {/* User Input */}
+        {!isRobot && typeof context === 'string' && context}
+        {/* Render Report */}
+        {isRobot && isChartChat && typeof context === 'object' && (
+          <div>
+            {`[${context.template_name}]: `}
+            <span className='text-theme-primary cursor-pointer' onClick={onLinkClick}>
+              <CodeOutlined className='mr-1' />
+              {context.template_introduce || 'More Details'}
+            </span>
+          </div>
+        )}
+        {/* Markdown */}
+        {isRobot && typeof context === 'string' && (
+          <GPTVis
+            components={{ ...markdownComponents, ...extraMarkdownComponents }}
+            rehypePlugins={[rehypeRaw]}
+            remarkPlugins={[remarkGfm]}
+          >
+            {formatMarkdownVal(value)}
+          </GPTVis>
+        )}
+        {!!relations?.length && (
+          <div className='flex flex-wrap mt-2'>
+            {relations?.map((value, index) => (
+              <Tag color='#108ee9' key={value + index}>
+                {value}
+              </Tag>
+            ))}
           </div>
         )}
       </div>
-      <div className='flex-1 overflow-hidden items-center text-md leading-8'>
-        {/* User Input */}
-        {!isRobot && typeof context === 'string' && context}
-      </div>
       {children}
     </div>
-  ) : (
-    <div></div>
   );
 }
 

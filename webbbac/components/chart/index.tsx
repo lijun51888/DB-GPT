@@ -10,7 +10,9 @@ type Props = {
 };
 
 function Chart({ chartsData }: Props) {
+
   const chartRows = useMemo(() => {
+    console.log(chartsData)
     if (chartsData) {
       const res = [];
       // 若是有类型为 IndicatorValue 的，提出去，独占一行

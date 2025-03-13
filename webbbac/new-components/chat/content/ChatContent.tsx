@@ -1,19 +1,20 @@
 import markdownComponents from '@/components/chat/chat-content/config';
 import { IChatDialogueMessageSchema } from '@/types/chat';
+import { STORAGE_USERINFO_KEY } from '@/utils/constants/index';
 import {
   CheckOutlined,
   ClockCircleOutlined,
   CloseOutlined,
   CodeOutlined,
+  CopyOutlined,
   LoadingOutlined,
-  StarFilled,
-  StarOutlined,
 } from '@ant-design/icons';
 import { GPTVis } from '@antv/gpt-vis';
+import { message } from 'antd';
 import classNames from 'classnames';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
@@ -79,16 +80,6 @@ const ChatContent: React.FC<{
   onLinkClick: () => void;
 }> = ({ content, onLinkClick }) => {
   const { t } = useTranslation();
-
-  const [isCollected, setCollected] = useState(false);
-  const handleCollect = () => {
-    setCollected(isCollected => !isCollected);
-    const list = JSON.parse(localStorage.getItem('Short_Cut_List') || '[]') || [];
-    const index = list.findIndex((item: any) => item.context == context);
-    if (!isCollected) list.push({ context });
-    else list.splice(index, 1);
-    localStorage.setItem('Short_Cut_List', JSON.stringify(list));
-  };
 
   const searchParams = useSearchParams();
   const scene = searchParams?.get('scene') ?? '';
@@ -174,21 +165,39 @@ const ChatContent: React.FC<{
     <div className='flex flex-1 gap-3 mt-6'>
       {/* icon */}
       <div className='flex flex-shrink-0 items-start'>{isRobot ? <RobotIcon model={model_name} /> : <UserIcon />}</div>
-      <div className={`flex ${isRobot ? 'flex-1' : ''} overflow-hidden`}>
+      <div className={`flex ${scene === 'chat_agent' && !thinking ? 'flex-1' : ''} overflow-hidden`}>
         {/* 用户提问 */}
         {!isRobot && (
-          <div
-            className='a flex flex-1 items-center text-sm text-[#1c2533] dark:text-white'
-            style={{ justifyContent: 'space-between' }}
-          >
-            <span>{typeof context === 'string' && context}</span>
-            <div onClick={handleCollect} style={{ marginLeft: '16px' }}>
-              {isCollected ? (
-                <StarFilled style={{ fontSize: 14 }} className='text-yellow-400 cursor-pointer' />
-              ) : (
-                <StarOutlined style={{ fontSize: 14, cursor: 'pointer' }} />
-              )}
+          <div className='flex flex-1 relative group'>
+            <div
+              className='flex-1 text-sm text-[#1c2533] dark:text-white'
+              style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+            >
+              {typeof context === 'string' && context}
             </div>
+            {typeof context === 'string' && context.trim() && (
+              <div className='absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200'>
+                <button
+                  className='flex items-center justify-center w-8 h-8 text-[#525964] dark:text-[rgba(255,255,255,0.6)] hover:text-[#1677ff] dark:hover:text-white transition-colors'
+                  onClick={() => {
+                    if (typeof context === 'string') {
+                      navigator.clipboard
+                        .writeText(context)
+                        .then(() => {
+                          message.success(t('copy_to_clipboard_success'));
+                        })
+                        .catch(err => {
+                          console.error(t('copy_to_clipboard_failed'), err);
+                          message.error(t('copy_to_clipboard_failed'));
+                        });
+                    }
+                  }}
+                  title={t('copy_to_clipboard')}
+                >
+                  <CopyOutlined />
+                </button>
+              </div>
+            )}
           </div>
         )}
         {/* ai回答 */}

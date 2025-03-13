@@ -37,7 +37,7 @@ const useChat = ({ queryAgentURL = '/api/v1/chat/completions', app_code }: Props
         ...data,
         conv_uid: chatId,
         app_code,
-        select_param: 'demo2',
+        select_param: 'BBAC',
       };
 
       //       if (!params.conv_uid) {

@@ -130,8 +130,8 @@ function SideBar() {
     const items: RouteItem[] = [
       {
         key: 'chat_with_db_execute',
-        name: 'Chat Data',
-        title: 'AI搜索',
+        name: 'chat_with_db_execute',
+        title: 'AI数据对话',
         isActive: router.asPath.includes('chat_with_db_execute'),
         icon: router.asPath.includes('chat_with_db_execute') ? (
           <div
@@ -142,10 +142,10 @@ function SideBar() {
               boxSizing: 'border-box',
             }}
           >
-            <Image key='image_chat' src='/AI搜索.png' alt='chat_image' width={22} height={22} />
+            <Image key='image_chat' src='/AI阅读.png' alt='chat_image' width={22} height={22} />
           </div>
         ) : (
-          <Image key='image_chat' src='/AI搜索.png' alt='chat_image' width={22} height={22} />
+          <Image key='image_chat' src='/AI阅读.png' alt='chat_image' width={22} height={22} />
         ),
         onClick: async () => {
           const chat_scene = 'chat_with_db_execute';
@@ -169,8 +169,8 @@ function SideBar() {
       },
       {
         key: 'chat_dashboard',
-        name: 'Chat Dashboard',
-        title: 'AI图表',
+        name: 'chat_dashboard',
+        title: 'AI报表查询',
         icon: router.asPath.includes('chat_dashboard') ? (
           <div
             style={{
@@ -209,7 +209,7 @@ function SideBar() {
       {
         key: 'ragflow',
         name: 'ragflow',
-        title: 'AI知识库',
+        title: 'AI知识搜索',
         icon: router.asPath.includes('ragflow') ? (
           <div
             style={{
@@ -219,10 +219,10 @@ function SideBar() {
               boxSizing: 'border-box',
             }}
           >
-            <Image key='image_chat' src='/AI阅读.png' alt='chat_image' width={22} height={22} />
+            <Image key='image_chat' src='/AI搜索.png' alt='chat_image' width={22} height={22} />
           </div>
         ) : (
-          <Image key='image_chat' src='/AI阅读.png' alt='chat_image' width={22} height={22} />
+          <Image key='image_chat' src='/AI搜索.png' alt='chat_image' width={22} height={22} />
         ),
         isActive: router.asPath.includes('ragflow'),
         onClick: async () => {
@@ -246,7 +246,6 @@ function SideBar() {
         },
       },
     ];
-    console.log(router.asPath, 'router.asPath');
     return items;
   }, [t, router.asPath, hasAdmin]);
 

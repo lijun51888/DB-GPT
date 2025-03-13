@@ -317,7 +317,7 @@ const Chat: React.FC = () => {
         setHistory,
       }}
     >
-      <Flex flex={1}>
+      <Flex flex={1} style={{ minHeight: 0 }}>
         <Layout
           className='bg-center dark:bg-gradient-dark'
           style={{

@@ -4,7 +4,7 @@ import { IChatDialogueMessageSchema } from '@/types/chat';
 import { Divider } from 'antd';
 import cls from 'classnames';
 import React, { memo, useContext, useMemo, useRef } from 'react';
-import { MobileChatContext } from '..';
+import { MobileChatContext } from '../';
 import Feedback from './Feedback';
 
 type DBGPTView = {
