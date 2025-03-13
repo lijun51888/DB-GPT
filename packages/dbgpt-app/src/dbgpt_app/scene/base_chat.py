@@ -1,6 +1,7 @@
 import datetime
 import logging
 import traceback
+import json
 from abc import ABC, abstractmethod
 from typing import Any, AsyncIterator, Dict, Optional, Union
 
@@ -64,6 +65,14 @@ def _build_conversation(
     )
 
 
+RESPONSE_FORMAT_SIMPLE = {
+    "thoughts": "thoughts summary to say to user",
+    "direct_response": "If the context is sufficient to answer user, reply directly "
+    "without sql",
+    "sql": "SQL Query to run",
+    "display_type": "Data display method",
+}
+
 class BaseChat(ABC):
     """DB-GPT Chat Service Base Module
     Include:
@@ -125,9 +134,14 @@ class BaseChat(ABC):
             prompt_template = self._prompt_service.get_template(self.prompt_code)
             chat_prompt_template = ChatPromptTemplate(
                 messages=[
-                    SystemPromptTemplate.from_template(prompt_template.template),
+                    SystemPromptTemplate.from_template(
+                        prompt_template.template,
+                        response_format=json.dumps(
+                            RESPONSE_FORMAT_SIMPLE, ensure_ascii=False, indent=4
+                        ),
+                    ),
                     MessagesPlaceholder(variable_name="chat_history"),
-                    HumanPromptTemplate.from_template("{question}"),
+                    HumanPromptTemplate.from_template("{user_input}"),
                 ]
             )
             self.prompt_template = AppScenePromptTemplateAdapter(
@@ -141,6 +155,7 @@ class BaseChat(ABC):
         self.current_message: StorageConversation = _build_conversation(
             self.chat_mode, chat_param, self.llm_model, self._conv_serve
         )
+        logger.info(f"db-prompt: \n{self.prompt_template.prompt}")
         self.history_messages = self.current_message.get_history_message()
         self.current_tokens_used: int = 0
         # The executor to submit blocking function
