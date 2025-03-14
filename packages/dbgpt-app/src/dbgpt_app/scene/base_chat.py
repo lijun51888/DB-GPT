@@ -144,7 +144,7 @@ class BaseChat(ABC):
         logger.info(f"chat_mode: \n{self.chat_mode.value()}")
         if self.chat_mode == ChatScene.ChatDashboard:
             # adapt prompt template according to the prompt code
-            prompt_template = self._prompt_service.get_template("bbac_dashboard")
+            prompt_template = self._prompt_service.get_template("d1b4cb65d6254091b8eab71f29b4df9d")
             logger.info(f"prompt_template: \n{prompt_template}")
             chat_prompt_template = ChatPromptTemplate(
                 messages=[
