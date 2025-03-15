@@ -65,7 +65,7 @@ const ChatInputPanel: React.FC<{ ctrl: AbortController }> = ({ ctrl }) => {
     <div className='flex flex-col w-5/6 mx-auto pt-4 pb-6 bg-transparent'>
       <div
         className={`flex flex-1 flex-col bg-white dark:bg-[rgba(255,255,255,0.16)] px-5 py-4 pt-2 rounded-xl relative border-t border-b border-l border-r dark:border-[rgba(255,255,255,0.6)] ${
-          isFocus ? 'border-[#1677ff]' : ''
+          isFocus ? 'border-[#e20613]' : ''
         }`}
         id='input-panel'
       >

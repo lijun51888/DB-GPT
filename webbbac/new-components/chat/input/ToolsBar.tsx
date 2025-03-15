@@ -46,21 +46,25 @@ const ToolsBar: React.FC<{
 
   const [shortCut, setShortCut] = useState<string>('');
 
-  useLocalStorageListener('Short_Cut_List', (updatedTraceInfo: any) => {
-    const list = (updatedTraceInfo || []).map((item: any) => {
-      return {
-        label: <Tag color='geekblue'> {item.context}</Tag>,
-        value: item.context,
-      };
-    });
-    setOpts(list || []);
-  });
+  // useLocalStorageListener('Short_Cut_List', (updatedTraceInfo: any) => {
+  //   const list = (updatedTraceInfo || []).map((item: any) => {
+  //     return {
+  //       label: <Tag color='geekblue'> {item.context}</Tag>,
+  //       value: item.context,
+  //     };
+  //   });
+  //   setOpts(list || []);
+  // });
 
   useEffect(() => {
-    const updatedTraceInfo = JSON.parse(localStorage.getItem('Short_Cut_List') || '[]') || [];
+    const updatedTraceInfo = [
+      { context: '统计今年的各供应商的订单交付情况，并列出订单交付最大的前十位' },
+      { context: '统计今年各个车型产量统计（status=1）' },
+      { context: '统计今年零件总数量和订货总量' },
+    ];
     const list = (updatedTraceInfo || []).map((item: any) => {
       return {
-        label: <Tag color='processing'>{item.context}</Tag>,
+        label: item.context,
         value: item.context,
       };
     });
@@ -186,7 +190,6 @@ const ToolsBar: React.FC<{
       return '';
     }
   }, [currentDialogue.select_param]);
-
   return (
     <div className='flex flex-col  mb-2'>
       <div className='flex items-center justify-between h-full w-full'>

@@ -253,9 +253,9 @@ const Chat: React.FC = () => {
 
   useAsyncEffect(async () => {
     // 如果是默认小助手，不获取历史记录
-    if (isChatDefault) {
-      return;
-    }
+    // if (isChatDefault) {
+    //   return;
+    // }
     const initMessage = getInitMessage();
     if (initMessage && initMessage.id === chatId) {
       return;

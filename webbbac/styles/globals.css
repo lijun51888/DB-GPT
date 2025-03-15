@@ -6,7 +6,7 @@ body {
   margin: 0;
   font-family: var(--joy-fontFamily-body, var(--joy-Josefin Sans, sans-serif));
   line-height: var(--joy-lineHeight-md, 1.5);
-  --antd-primary-color: #1677ff;
+  --antd-primary-color: #e20613;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   -webkit-appearance: none;
 }

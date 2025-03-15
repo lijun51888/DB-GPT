@@ -97,7 +97,7 @@ export default function ResourceCard(props: IProps) {
 
             <Switch
               defaultChecked={editResource.is_dynamic || false}
-              style={{ background: resource.is_dynamic ? '#1677ff' : '#ccc' }}
+              style={{ background: resource.is_dynamic ? '#e20613' : '#ccc' }}
               onChange={value => {
                 updateResource(value, 'is_dynamic');
               }}

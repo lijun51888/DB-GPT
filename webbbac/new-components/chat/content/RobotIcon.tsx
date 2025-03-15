@@ -7,7 +7,7 @@ const RobotIcon: React.FC<{ model: string }> = ({ model }) => {
   const scene = searchParams?.get('scene') ?? '';
 
   return (
-    <div style={{ background: '#1677ff', padding: '4px', borderRadius: '50%' }}>
+    <div style={{ background: '#e20613', padding: '4px', borderRadius: '50%' }}>
       <Image src='/LOGO_2.png' alt='' width={26} height={26} />
     </div>
   );

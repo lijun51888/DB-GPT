@@ -44,7 +44,7 @@ function smallMenuItemStyle(active?: boolean) {
   }`;
 }
 
-function SideBar() {
+function SideBar({ onToggleCollapse, isCollapsed }) {
   // const { chatId, scene, isMenuExpand, refreshDialogList, setIsMenuExpand, setAgent, mode, setMode, adminList } =
   //   useContext(ChatContext);
   const router = useRouter();
@@ -126,12 +126,19 @@ function SideBar() {
     localStorage.setItem(STORAGE_LANG_KEY, language);
   }, [i18n]);
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  // 处理点击图标切换侧边栏显示状态的函数
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   const functions = useMemo(() => {
     const items: RouteItem[] = [
       {
         key: 'chat_with_db_execute',
         name: 'chat_with_db_execute',
-        title: 'AI数据对话',
+        title: 'AI Chatbot',
         isActive: router.asPath.includes('chat_with_db_execute'),
         icon: router.asPath.includes('chat_with_db_execute') ? (
           <div
@@ -163,14 +170,17 @@ function SideBar() {
               }),
             );
             setAgent?.('chat_with_db_execute');
-            router.push(`/chat?scene=${chat_scene}&id=${res.conv_uid}${model ? `&model=${model}` : ''}`);
+            console.log(process.env)
+            router.push(
+              `/chat?scene=${chat_scene}&id=${process.env.NEXT_PUBLIC_CON_UID_1 ? process.env.NEXT_PUBLIC_CON_UID_1 : res.conv_uid}${model ? `&model=${model}` : ''}`,
+            );
           }
         },
       },
       {
         key: 'chat_dashboard',
         name: 'chat_dashboard',
-        title: 'AI报表查询',
+        title: 'AI Dashboard',
         icon: router.asPath.includes('chat_dashboard') ? (
           <div
             style={{
@@ -202,14 +212,16 @@ function SideBar() {
               }),
             );
             setAgent?.('chat_dashboard');
-            router.push(`/chat?scene=${chat_scene}&id=${res.conv_uid}${model ? `&model=${model}` : ''}`);
+            router.push(
+              `/chat?scene=${chat_scene}&id=${process.env.NEXT_PUBLIC_CON_UID_2 ? process.env.NEXT_PUBLIC_CON_UID_2 : res.conv_uid}${model ? `&model=${model}` : ''}`,
+            );
           }
         },
       },
       {
         key: 'ragflow',
         name: 'ragflow',
-        title: 'AI知识搜索',
+        title: 'AI Knowledge',
         icon: router.asPath.includes('ragflow') ? (
           <div
             style={{
@@ -273,13 +285,19 @@ function SideBar() {
       // }}
     >
       <div
+        onClick={() => onToggleCollapse()}
         className='flex items-center'
-        style={{ cursor: 'pointer', padding: '0 12px', marginBottom: '21px', marginTop: '21px' }}
+        style={{
+          cursor: 'pointer',
+          padding: '0 12px',
+          marginBottom: '21px',
+          marginTop: '21px',
+        }}
       >
         <div
           style={{
             borderRadius: '50%',
-            background: '#1677ff',
+            background: '#e20613',
             display: 'flex',
             padding: '4px',
             alignItems: 'center',
@@ -293,7 +311,30 @@ function SideBar() {
             style={{ width: '26px', height: '26px' }}
           ></img>
         </div>
-        <div style={{ fontWeight: 'bold', fontSize: '18px', marginLeft: '6px' }}>小嘶</div>
+        {!isCollapsed && (
+          <>
+            <div
+              style={{
+                fontWeight: 'bold',
+                fontSize: '18px',
+                marginLeft: '6px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                flex: 1,
+                alignItems: 'center',
+              }}
+            >
+              <span>小嘶</span>
+              <img
+                alt='MENU'
+                decoding='async'
+                data-nimg='1'
+                src='/menu.png'
+                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+              ></img>
+            </div>
+          </>
+        )}
       </div>
 
       {functions.map((i: any) => (
@@ -314,14 +355,16 @@ function SideBar() {
               alignItems: 'center',
             }}
           >
-            <div
-              style={{
-                marginRight: '8px',
-              }}
-            >
-              {i?.icon}
-            </div>
-            <div>{i.title}</div>
+            <div>{i?.icon}</div>
+            {!isCollapsed && (
+              <div
+                style={{
+                  marginLeft: '8px',
+                }}
+              >
+                {i.title}
+              </div>
+            )}
           </div>
         </div>
       ))}

@@ -17,7 +17,7 @@
     "build:prod": "APP_ENV=prod  NODE_OPTIONS=--max_old_space_size=8192 next build",
     "lint": "eslint '**/*.{ts,tsx}' --fix",
     "format": "prettier --write '**/*.{ts,tsx}'",
-    "export": "next export",
+    "export": "next export -o /Users/lijun/Volume/nginx/sites/dbgptbbac",
     "compile": " NODE_OPTIONS=--max_old_space_size=8192 next build && next export"
   },
   "dependencies": {

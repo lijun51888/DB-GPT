@@ -16,9 +16,9 @@ import '../styles/globals.css';
 const antdDarkTheme: MappingAlgorithm = (seedToken, mapToken) => {
   return {
     ...theme.darkAlgorithm(seedToken, mapToken),
-    colorBgBase: '#1677ff',
-    colorBorder: '#1677ff',
-    colorBgContainer: '#1677ff',
+    colorBgBase: '#e20613',
+    colorBorder: '#e20613',
+    colorBgContainer: '#e20613',
   };
 };
 
@@ -53,6 +53,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const { isMenuExpand, mode } = useContext(ChatContext);
   const { i18n } = useTranslation();
   const [isLogin, setIsLogin] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const router = useRouter();
 
@@ -102,13 +103,13 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
             height: '100%',
             // left: 0,
             // position: 'absolute',
-            width: '280px',
+            width: isCollapsed ? '58px' : '280px',
             background: '#f3f4f6',
             display: 'flex',
             flexDirection: 'column',
           }}
         >
-          <SideBar />
+          <SideBar onToggleCollapse={() => setIsCollapsed(!isCollapsed)} isCollapsed={isCollapsed} />
         </div>
         <div className='flex flex-col flex-1 relative overflow-hidden'>{children}</div>
         {/* <FloatHelper /> */}
@@ -121,7 +122,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
       locale={i18n.language === 'en' ? enUS : zhCN}
       theme={{
         token: {
-          colorPrimary: '#1677ff',
+          colorPrimary: '#e20613',
           borderRadius: 12,
         },
         algorithm: mode === 'dark' ? antdDarkTheme : undefined,

@@ -15,7 +15,7 @@ host = "${env:MYSQL_HOST:-127.0.0.1}"
 port = "${env:MYSQL_PORT:-3306}"
 database = "${env:MYSQL_DATABASE:-dbgpt}"
 user = "${env:MYSQL_USER:-root}"
-password ="${env:MYSQL_PASSWORD:-aa123456}"
+password ="${env:MYSQL_PASSWORD:-Abcd1234}"
 
 [service.model.worker]
 host = "127.0.0.1"
