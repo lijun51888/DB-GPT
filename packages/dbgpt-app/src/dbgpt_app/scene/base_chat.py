@@ -109,9 +109,8 @@ class BaseChat(ABC):
             - model_name:(str) llm model name
             - select_param:(str) select param
         """
-        logger.info(f"chat_mode: \n{chat_param['chat_mode']}")
-        logger.info(f"chat_param: \n{chat_param}")
-        logger.info(f"system_app: \n{system_app}")
+        logger.info(f"chat_mode: {chat_param['chat_mode']}")
+        logger.info(f"chat_param: {chat_param}")
         self.system_app = system_app
         self.app_config = self.system_app.config.configs.get("app_config")
         self.web_config = self.app_config.service.web
@@ -141,30 +140,7 @@ class BaseChat(ABC):
             )
         )
         self._prompt_service = PromptService.get_instance(self.system_app)
-        logger.info(f"chat_mode: \n{self.chat_mode.value()}")
-        if self.chat_mode == ChatScene.ChatDashboard:
-            # adapt prompt template according to the prompt code
-            prompt_template = self._prompt_service.get_template("bbac_dashboard")
-            logger.info(f"prompt_template: \n{prompt_template}")
-            chat_prompt_template = ChatPromptTemplate(
-                messages=[
-                    SystemPromptTemplate.from_template(
-                        prompt_template.template,
-                        response_format=json.dumps(
-                            RESPONSE_FORMAT, ensure_ascii=False, indent=4
-                        ),
-                    ),
-                    MessagesPlaceholder(variable_name="chat_history"),
-                    HumanPromptTemplate.from_template("{input}"),
-                ]
-            )
-            self.prompt_template = AppScenePromptTemplateAdapter(
-                prompt=chat_prompt_template,
-                template_scene=self.prompt_template.template_scene,
-                stream_out=self.prompt_template.stream_out,
-                output_parser=self.prompt_template.output_parser,
-                need_historical_messages=False,
-            )
+        logger.info(f"prompt_code: {self.prompt_code}")
         if self.prompt_code:
             # adapt prompt template according to the prompt code
             prompt_template = self._prompt_service.get_template(self.prompt_code)
