@@ -132,7 +132,7 @@ class DbChatOutputParser(BaseOutputParser):
                 not prompt_response.direct_response
                 or len(prompt_response.direct_response) <= 0
             ) and (not prompt_response.sql or len(prompt_response.sql) <= 0):
-                raise AppActionException("Can not find sql in response", speak)
+                raise AppActionException("出了点小状况，但别担心，我们正在努力解决，感谢你的耐心！", "#1")
 
             if prompt_response.sql:
                 df = data(prompt_response.sql)
@@ -173,9 +173,8 @@ class DbChatOutputParser(BaseOutputParser):
             result = b""
         if not success:
             view_content = (
-                f'{speak} \\n <span style="color:red">ERROR!</span>'
-                f"{err_msg} \n {result.decode('utf-8')}"
+                f'<span style="color:red">ERROR!</span> {err_msg}'
             )
-            raise AppActionException("Generate view content failed", view_content)
+            raise AppActionException(view_content, "#2")
         else:
             return speak + "\n" + result.decode("utf-8")
