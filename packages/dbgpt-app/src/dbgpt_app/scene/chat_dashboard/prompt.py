@@ -14,7 +14,7 @@ _DEFAULT_TEMPLATE = """
 According to the following table structure definition:
 {table_info}
 Provide professional data analysis to support users' goals:
-{input}
+{user_input}
 
 Provide at least 4 and at most 8 dimensions of analysis according to user goals.
 The output data of the analysis cannot exceed 4 columns, and do not use columns such \
@@ -41,6 +41,7 @@ The important thing is: Please make sure to only return the json string, do not 
 """
 
 RESPONSE_FORMAT = [
+    
     {
         "thoughts": "Current thinking and value of data analysis",
         "showcase": "What type of charts to show",
@@ -48,6 +49,7 @@ RESPONSE_FORMAT = [
         "title": "Data Analysis Title",
     }
 ]
+
 
 PROMPT_NEED_STREAM_OUT = False
 
@@ -57,7 +59,7 @@ prompt = ChatPromptTemplate(
             PROMPT_SCENE_DEFINE + _DEFAULT_TEMPLATE,
             response_format=json.dumps(RESPONSE_FORMAT, indent=4),
         ),
-        HumanPromptTemplate.from_template("{input}"),
+        HumanPromptTemplate.from_template("{user_input}"),
     ]
 )
 

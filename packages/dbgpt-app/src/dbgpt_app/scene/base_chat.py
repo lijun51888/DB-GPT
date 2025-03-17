@@ -73,15 +73,12 @@ RESPONSE_FORMAT_SIMPLE = {
     "display_type": "Data display method",
 }
 
-RESPONSE_FORMAT = [
-    {
-        "thoughts": "Current thinking and value of data analysis",
-        "showcase": "What type of charts to show",
-        "sql": "data analysis SQL",
-        "title": "Data Analysis Title",
-    }
-]
-
+RESPONSE_FORMAT_DASHBOARD  = {
+    "thoughts": "Current thinking and value of data analysis",
+    "showcase": "What type of charts to show",
+    "sql": "data analysis SQL",
+    "title": "Data Analysis Title",
+}
 class BaseChat(ABC):
     """DB-GPT Chat Service Base Module
     Include:
@@ -145,12 +142,15 @@ class BaseChat(ABC):
             # adapt prompt template according to the prompt code
             prompt_template = self._prompt_service.get_template(self.prompt_code)
             logger.info(f"prompt_template: \n{prompt_template}")
+            response_format_simple = RESPONSE_FORMAT_SIMPLE
+            if self.chat_mode == ChatScene.ChatDashboard:
+                response_format_simple = RESPONSE_FORMAT_DASHBOARD
             chat_prompt_template = ChatPromptTemplate(
                 messages=[
                     SystemPromptTemplate.from_template(
                         prompt_template.template,
                         response_format=json.dumps(
-                            RESPONSE_FORMAT_SIMPLE, ensure_ascii=False, indent=4
+                            response_format_simple, ensure_ascii=False, indent=4
                         ),
                     ),
                     MessagesPlaceholder(variable_name="chat_history"),
