@@ -16,7 +16,7 @@ import RobotIcon from './RobotIcon';
 const UserIcon: React.FC = () => {
   return (
     <div style={{ background: '#E5E5E5', padding: '4px', borderRadius: '50%' }}>
-      <Image src='/Vector.png' alt='' width={26} height={26} />
+      <Image src='/Vector.png' alt='' width={29} height={29} />
     </div>
   );
 };

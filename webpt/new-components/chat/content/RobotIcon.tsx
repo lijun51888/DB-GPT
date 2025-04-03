@@ -9,8 +9,8 @@ const AdaptiveCircle = () => {
     const circleElement = circleRef.current;
     if (textElement && circleElement) {
       const textWidth = textElement.offsetWidth;
-      const padding = 4; // 内边距，可按需调整
-      const size = textWidth + padding * 2;
+      const padding = 6; // 内边距，可按需调整
+      const size = textWidth + padding * 2.4;
       circleElement.style.width = `${size}px`;
       circleElement.style.height = `${size}px`;
       circleElement.style.borderRadius = `${size / 2}px`;
@@ -28,7 +28,7 @@ const AdaptiveCircle = () => {
         alignItems: 'center',
       }}
     >
-      <span ref={textRef} style={{ color: '#fff', fontSize: '12px' }}>
+      <span ref={textRef} style={{ color: '#fff', fontSize: '12px', boxSizing: 'border-box' }}>
         纳儿
       </span>
     </div>

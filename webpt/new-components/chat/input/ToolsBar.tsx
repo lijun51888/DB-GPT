@@ -9,6 +9,7 @@ import Image from 'next/image';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Resource from './Resource';
+import ModelSwitcher from './ModelSwitcher';
 
 interface ToolsConfig {
   icon: React.ReactNode;
@@ -55,12 +56,13 @@ const ToolsBar: React.FC<{
   //   });
   //   setOpts(list || []);
   // });
-
   useEffect(() => {
     const updatedTraceInfo = [
-      { context: '统计今年的各供应商的订单交付情况，并列出订单交付最大的前十位' },
-      { context: '统计今年各个车型产量统计（status=1）' },
-      { context: '统计今年零件总数量和订货总量' },
+      { context: '帮我找出低客流站点' },
+      { context: '帮我计算三月份的632路的断面不均衡系数' },
+      { context: '统计客流排名前10的客流上下车组合站点' },
+      { context: '线路33路的上行方向的客流上下车的表现' },
+      { context: '帮我查询线路是632路的客流分布情况' },
     ];
     const list = (updatedTraceInfo || []).map((item: any) => {
       return {
@@ -203,6 +205,7 @@ const ToolsBar: React.FC<{
             allowClear
             options={opts}
           />
+          <ModelSwitcher />
           <Resource fileList={fileList} setFileList={setFileList} setLoading={setLoading} fileName={fileName} />
           {/* <ModelSwitcher />
           <Resource fileList={fileList} setFileList={setFileList} setLoading={setLoading} fileName={fileName} />
