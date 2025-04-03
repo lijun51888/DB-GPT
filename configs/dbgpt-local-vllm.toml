@@ -35,5 +35,5 @@ provider = "hf"
 # If not provided, the model will be downloaded from the Hugging Face model hub
 # uncomment the following line to specify the model path in the local file system
 # path = "the-model-path-in-the-local-file-system"
-path = "/data/models/bge-large-zh-v1.5"
+path = "/Users/lijun/LLModels/BAAI/bge-large-zh-v1.5"
 

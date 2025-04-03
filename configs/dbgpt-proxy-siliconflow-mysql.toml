@@ -11,7 +11,7 @@ port = 5670
 
 [service.web.database]
 type = "mysql"
-host = "${env:MYSQL_HOST:-127.0.0.1}"
+host = "${env:MYSQL_HOST:-localhost}"
 port = "${env:MYSQL_PORT:-3306}"
 database = "${env:MYSQL_DATABASE:-dbgpt}"
 user = "${env:MYSQL_USER:-root}"
@@ -30,6 +30,7 @@ persist_path = "pilot/data"
 [[models.llms]]
 name = "Qwen/Qwen2.5-Coder-32B-Instruct"
 provider = "proxy/siliconflow"
+api_url = "https://api.siliconflow.cn/v1/embeddings"
 api_key = "${env:SILICONFLOW_API_KEY}"
 
 [[models.embeddings]]

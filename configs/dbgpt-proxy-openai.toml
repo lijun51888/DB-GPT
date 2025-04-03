@@ -27,7 +27,9 @@ api_base = "${env:OPENAI_API_BASE:-https://api.openai.com/v1}"
 api_key = "${env:OPENAI_API_KEY}"
 
 [[models.embeddings]]
-name = "${env:EMBEDDING_MODEL_NAME:-text-embedding-3-small}"
-provider = "${env:EMBEDDING_MODEL_PROVIDER:-proxy/openai}"
-api_url = "${env:EMBEDDING_MODEL_API_URL:-https://api.openai.com/v1/embeddings}"
-api_key = "${env:OPENAI_API_KEY}"
+name = "text2vec-large-chinese"
+provider = "hf"
+# If not provided, the model will be downloaded from the Hugging Face model hub
+# uncomment the following line to specify the model path in the local file system
+# path = "the-model-path-in-the-local-file-system"
+path = "/data/models/text2vec-large-chinese"
