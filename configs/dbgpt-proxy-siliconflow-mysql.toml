@@ -30,7 +30,6 @@ persist_path = "pilot/data"
 [[models.llms]]
 name = "Qwen/Qwen2.5-Coder-32B-Instruct"
 provider = "proxy/siliconflow"
-api_url = "https://api.siliconflow.cn/v1/embeddings"
 api_key = "${env:SILICONFLOW_API_KEY}"
 
 [[models.embeddings]]
