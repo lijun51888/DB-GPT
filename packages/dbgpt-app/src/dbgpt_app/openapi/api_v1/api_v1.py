@@ -511,8 +511,11 @@ async def chat_completions(
     if chat_history_info is not None:
         if chat_history_info.app_code is not None:
             dialogue.app_code = chat_history_info.app_code
-    else:
+    if dialogue.app_code is None:
         dialogue.app_code = dialogue.chat_mode
+    logger.info(
+        f"chat_completions:app_code={dialogue.app_code}"
+    )
     dialogue = adapt_native_app_model(dialogue)
     headers = {
         "Content-Type": "text/event-stream",
