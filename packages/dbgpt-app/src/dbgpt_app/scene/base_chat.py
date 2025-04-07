@@ -57,6 +57,7 @@ def _build_conversation(
         chat_mode=chat_mode.value(),
         user_name=chat_param.get("user_name"),
         sys_code=chat_param.get("sys_code"),
+        app_code=chat_param.get("app_code"),
         model_name=model_name,
         param_type=param_type,
         param_value=param_value,
