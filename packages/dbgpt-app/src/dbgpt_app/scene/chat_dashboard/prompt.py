@@ -1,7 +1,12 @@
 import json
 
 from dbgpt._private.config import Config
-from dbgpt.core import ChatPromptTemplate, HumanPromptTemplate, SystemPromptTemplate
+from dbgpt.core import (
+    ChatPromptTemplate,
+    HumanPromptTemplate,
+    MessagesPlaceholder,
+    SystemPromptTemplate,
+)
 from dbgpt_app.scene import AppScenePromptTemplateAdapter, ChatScene
 from dbgpt_app.scene.chat_dashboard.out_parser import ChatDashboardOutputParser
 
@@ -59,6 +64,7 @@ prompt = ChatPromptTemplate(
             PROMPT_SCENE_DEFINE + _DEFAULT_TEMPLATE,
             response_format=json.dumps(RESPONSE_FORMAT, indent=4),
         ),
+        MessagesPlaceholder(variable_name="chat_history"),
         HumanPromptTemplate.from_template("{user_input}"),
     ]
 )
@@ -67,7 +73,6 @@ prompt_adapter = AppScenePromptTemplateAdapter(
     prompt=prompt,
     template_scene=ChatScene.ChatDashboard.value(),
     stream_out=True,
-    output_parser=ChatDashboardOutputParser(is_stream_out=PROMPT_NEED_STREAM_OUT),
-    need_historical_messages=False,
+    output_parser=ChatDashboardOutputParser(),
 )
 CFG.prompt_template_registry.register(prompt_adapter, is_default=True)

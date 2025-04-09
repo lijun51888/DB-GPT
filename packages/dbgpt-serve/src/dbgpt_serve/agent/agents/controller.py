@@ -15,7 +15,9 @@ from dbgpt.agent import (
     AutoPlanChatManager,
     ConversableAgent,
     DefaultAWELLayoutManager,
+    EnhancedShortTermMemory,
     GptsMemory,
+    HybridMemory,
     LLMConfig,
     ResourceType,
     UserProxyAgent,
@@ -31,11 +33,13 @@ from dbgpt.core.awel.flow.flow_factory import FlowCategory
 from dbgpt.core.interface.message import StorageConversation
 from dbgpt.model.cluster import WorkerManagerFactory
 from dbgpt.model.cluster.client import DefaultLLMClient
+from dbgpt.util.executor_utils import ExecutorFactory
 from dbgpt.util.json_utils import serialize
 from dbgpt.util.tracer import TracerManager
 from dbgpt_app.dbgpt_server import system_app
 from dbgpt_app.scene.base import ChatScene
 from dbgpt_serve.conversation.serve import Serve as ConversationServe
+from dbgpt_serve.core import blocking_func_to_async
 from dbgpt_serve.prompt.api.endpoints import get_service
 from dbgpt_serve.prompt.service import service as PromptService
 
@@ -130,12 +134,27 @@ class MultiAgents(BaseComponent, ABC):
         return self.gpts_app.app_detail(app_code)
 
     def get_or_build_agent_memory(self, conv_id: str, dbgpts_name: str) -> AgentMemory:
-        memory_key = f"{dbgpts_name}_{conv_id}"
-        if memory_key in self.agent_memory_map:
-            return self.agent_memory_map[memory_key]
+        from dbgpt.rag.embedding.embedding_factory import EmbeddingFactory
+        from dbgpt_serve.rag.storage_manager import StorageManager
 
-        agent_memory = AgentMemory(gpts_memory=self.memory)
-        self.agent_memory_map[memory_key] = agent_memory
+        executor = self.system_app.get_component(
+            ComponentType.EXECUTOR_DEFAULT, ExecutorFactory
+        ).create()
+
+        storage_manager = StorageManager.get_instance(self.system_app)
+        vector_store = storage_manager.create_vector_store(index_name="_agent_memory_")
+        embeddings = EmbeddingFactory.get_instance(self.system_app).create()
+        short_term_memory = EnhancedShortTermMemory(
+            embeddings, executor=executor, buffer_size=10
+        )
+        memory = HybridMemory.from_vstore(
+            vector_store,
+            embeddings=embeddings,
+            executor=executor,
+            short_term_memory=short_term_memory,
+        )
+        agent_memory = AgentMemory(memory, gpts_memory=self.memory)
+
         return agent_memory
 
     async def agent_chat_v2(
@@ -510,7 +529,9 @@ class MultiAgents(BaseComponent, ABC):
                     prompt_template: PromptTemplate = prompt_service.get_template(
                         prompt_code=record.prompt_template
                     )
-                depend_resource = rm.build_resource(record.resources, version="v1")
+                depend_resource = await blocking_func_to_async(
+                    CFG.SYSTEM_APP, rm.build_resource, record.resources
+                )
                 agent = (
                     await cls()
                     .bind(context)

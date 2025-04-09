@@ -4,19 +4,20 @@ import logging
 import math
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, field
 from typing import Any, List, Optional
 
-from dbgpt._private.pydantic import ConfigDict, Field
 from dbgpt.core import Chunk, Embeddings
 from dbgpt.core.awel.flow import Parameter
 from dbgpt.storage.base import IndexStoreBase, IndexStoreConfig
 from dbgpt.storage.vector_store.filters import MetadataFilters
+from dbgpt.util import RegisterParameters
 from dbgpt.util.executor_utils import blocking_func_to_async
 from dbgpt.util.i18n_utils import _
 
 logger = logging.getLogger(__name__)
 
-_COMMON_PARAMETERS = [
+_VECTOR_STORE_COMMON_PARAMETERS = [
     Parameter.build_from(
         _("Collection Name"),
         "name",
@@ -27,6 +28,20 @@ _COMMON_PARAMETERS = [
         optional=True,
         default="dbgpt_collection",
     ),
+    Parameter.build_from(
+        _("Embedding Function"),
+        "embedding_fn",
+        Embeddings,
+        description=_(
+            "The embedding function of vector store, if not set, will use "
+            "the default embedding function."
+        ),
+        optional=True,
+        default=None,
+    ),
+]
+
+_COMMON_PARAMETERS = [
     Parameter.build_from(
         _("User"),
         "user",
@@ -47,70 +62,36 @@ _COMMON_PARAMETERS = [
         optional=True,
         default=None,
     ),
-    Parameter.build_from(
-        _("Embedding Function"),
-        "embedding_fn",
-        Embeddings,
-        description=_(
-            "The embedding function of vector store, if not set, will use "
-            "the default embedding function."
-        ),
-        optional=True,
-        default=None,
-    ),
-    Parameter.build_from(
-        _("Max Chunks Once Load"),
-        "max_chunks_once_load",
-        int,
-        description=_(
-            "The max number of chunks to load at once. If your document is "
-            "large, you can set this value to a larger number to speed up the loading "
-            "process. Default is 10."
-        ),
-        optional=True,
-        default=10,
-    ),
-    Parameter.build_from(
-        _("Max Threads"),
-        "max_threads",
-        int,
-        description=_(
-            "The max number of threads to use. Default is 1. If you set "
-            "this bigger than 1, please make sure your vector store is thread-safe."
-        ),
-        optional=True,
-        default=1,
-    ),
 ]
 
 
-class VectorStoreConfig(IndexStoreConfig):
+@dataclass
+class VectorStoreConfig(IndexStoreConfig, RegisterParameters):
     """Vector store config."""
 
-    model_config = ConfigDict(arbitrary_types_allowed=True, extra="allow")
+    __cfg_type__ = "vector_store"
 
-    user: Optional[str] = Field(
+    user: Optional[str] = field(
         default=None,
-        description="The user of vector store, if not set, will use the default user.",
+        metadata={
+            "help": _(
+                "The user of vector store, if not set, will use the default user."
+            ),
+        },
     )
-    password: Optional[str] = Field(
+    password: Optional[str] = field(
         default=None,
-        description=(
-            "The password of vector store, if not set, will use the default password."
-        ),
+        metadata={
+            "help": _(
+                "The password of vector store, if not set, "
+                "will use the default password."
+            ),
+        },
     )
-    topk: int = Field(
-        default=5,
-        description="Topk of vector search",
-    )
-    score_threshold: float = Field(
-        default=0.3,
-        description="Recall score of vector search",
-    )
-    type: Optional[str] = Field(
-        default=None,
-        description="vector storage type",
-    )
+
+    def create_store(self, **kwargs) -> "VectorStoreBase":
+        """Create a new index store from the config."""
+        raise NotImplementedError("Current vector store does not support create_store")
 
 
 class VectorStoreBase(IndexStoreBase, ABC):

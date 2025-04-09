@@ -31,6 +31,7 @@ rag = [
     "bs4",
     "python-pptx",
     "python-docx",
+    "olefile",
     "pypdf",
     "pdfplumber",
 ]
@@ -74,9 +75,12 @@ storage_chromadb = [
     ]
 storage_elasticsearch = ["elasticsearch"]
 storage_obvector = ["pyobvector"]
-proxy_tongyi = [
-    # For tongyi proxy embedding model
-    "dashscope"
+
+file_oss = [
+    "oss2" # Aliyun OSS
+]
+file_s3 = [
+    "boto3"
 ]
 
 [tool.uv]

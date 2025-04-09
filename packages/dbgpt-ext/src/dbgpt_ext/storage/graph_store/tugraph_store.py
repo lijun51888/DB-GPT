@@ -4,76 +4,141 @@ import base64
 import json
 import logging
 import os
+from dataclasses import dataclass, field
 from typing import List
 
-from dbgpt._private.pydantic import ConfigDict, Field
+from dbgpt.core.awel.flow import Parameter, ResourceCategory, register_resource
 from dbgpt.storage.graph_store.base import GraphStoreBase, GraphStoreConfig
 from dbgpt.storage.graph_store.graph import GraphElemType
+from dbgpt.util.i18n_utils import _
 from dbgpt_ext.datasource.conn_tugraph import TuGraphConnector
 
 logger = logging.getLogger(__name__)
 
 
+@register_resource(
+    _("TuGraph Graph Config"),
+    "tugraph_config",
+    category=ResourceCategory.KNOWLEDGE_GRAPH,
+    description=_("TuGraph config."),
+    parameters=[
+        Parameter.build_from(
+            _("host"),
+            "host",
+            str,
+            optional=True,
+            default="127.0.0.1",
+            description=_("TuGraph host"),
+        ),
+        Parameter.build_from(
+            _("port"),
+            "port",
+            int,
+            optional=True,
+            default="7687",
+            description=_("TuGraph port"),
+        ),
+        Parameter.build_from(
+            _("username"),
+            "username",
+            str,
+            optional=True,
+            default="admin",
+            description=_("TuGraph username"),
+        ),
+        Parameter.build_from(
+            _("password"),
+            "password",
+            str,
+            optional=True,
+            default="73@TuGraph",
+            description=_("TuGraph password"),
+        ),
+    ],
+)
+@dataclass
 class TuGraphStoreConfig(GraphStoreConfig):
     """TuGraph store config."""
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    __type__ = "tugraph"
 
-    host: str = Field(
+    host: str = field(
         default="127.0.0.1",
-        description="TuGraph host",
+        metadata={
+            "description": "TuGraph host",
+        },
     )
-    port: int = Field(
+    port: int = field(
         default=7687,
-        description="TuGraph port",
+        metadata={
+            "description": "TuGraph port",
+        },
     )
-    username: str = Field(
+    username: str = field(
         default="admin",
-        description="login username",
+        metadata={
+            "description": "login username",
+        },
     )
-    password: str = Field(
+    password: str = field(
         default="73@TuGraph",
-        description="login password",
+        metadata={
+            "description": "login password",
+        },
     )
-    vertex_type: str = Field(
+    vertex_type: str = field(
         default=GraphElemType.ENTITY.value,
-        description="The type of entity vertex, `entity` by default.",
+        metadata={
+            "description": "The type of vertex, `entity` by default.",
+        },
     )
-    document_type: str = Field(
+    document_type: str = field(
         default=GraphElemType.DOCUMENT.value,
-        description="The type of document vertex, `document` by default.",
+        metadata={
+            "description": "The type of document vertex, `document` by default.",
+        },
     )
-    chunk_type: str = Field(
+    chunk_type: str = field(
         default=GraphElemType.CHUNK.value,
-        description="The type of chunk vertex, `relation` by default.",
+        metadata={
+            "description": "The type of chunk vertex, `relation` by default.",
+        },
     )
-    edge_type: str = Field(
+    edge_type: str = field(
         default=GraphElemType.RELATION.value,
-        description="The type of relation edge, `relation` by default.",
+        metadata={
+            "description": "The type of relation edge, `relation` by default.",
+        },
     )
-    include_type: str = Field(
+    include_type: str = field(
         default=GraphElemType.INCLUDE.value,
-        description="The type of include edge, `include` by default.",
+        metadata={
+            "description": "The type of include edge, `include` by default.",
+        },
     )
-    next_type: str = Field(
+    next_type: str = field(
         default=GraphElemType.NEXT.value,
-        description="The type of next edge, `next` by default.",
+        metadata={
+            "description": "The type of next edge, `next` by default.",
+        },
     )
-    plugin_names: List[str] = Field(
-        default=["leiden"],
-        description=(
-            "Plugins need to be loaded when initialize TuGraph, "
-            "code: https://github.com/TuGraph-family"
-            "/dbgpt-tugraph-plugins/tree/master/cpp"
-        ),
+    plugin_names: List[str] = field(
+        default_factory=lambda: ["leiden"],
+        metadata={
+            "description": "The list of plugin names to be uploaded to the database.",
+        },
     )
-    enable_summary: bool = Field(
+    enable_summary: bool = field(
         default=True,
-        description="Enable graph community summary or not.",
+        metadata={
+            "description": "Enable graph community summary or not.",
+        },
     )
-    enable_similarity_search: bool = Field(
+    enable_similarity_search: bool = field(
         default=False,
-        description="Enable the similarity search or not",
+        metadata={
+            "description": "Enable the similarity search or not",
+        },
     )
 
 

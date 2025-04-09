@@ -189,3 +189,5 @@ thirdparty
 configs/my
 /approuter
 /mta_archives
+.devcontainer/dev.toml
+test_docs

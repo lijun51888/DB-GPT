@@ -2,22 +2,24 @@
 
 import logging
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import List, Optional
 
 from pydantic import Field
 
-from dbgpt._private.pydantic import ConfigDict
-from dbgpt.core import Chunk
+from dbgpt.core import Chunk, Embeddings
 from dbgpt.storage.base import IndexStoreBase, IndexStoreConfig
 from dbgpt.storage.graph_store.graph import Graph
+from dbgpt.util import RegisterParameters
 
 logger = logging.getLogger(__name__)
 
 
-class KnowledgeGraphConfig(IndexStoreConfig):
+@dataclass
+class KnowledgeGraphConfig(IndexStoreConfig, RegisterParameters):
     """Knowledge graph config."""
 
-    model_config = ConfigDict(arbitrary_types_allowed=True, extra="allow")
+    __cfg_type__ = "graph_store"
 
 
 class KnowledgeGraphBase(IndexStoreBase, ABC):
@@ -26,6 +28,11 @@ class KnowledgeGraphBase(IndexStoreBase, ABC):
     @abstractmethod
     def get_config(self) -> KnowledgeGraphConfig:
         """Get the knowledge graph config."""
+
+    @property
+    def embeddings(self) -> Embeddings:
+        """Get the knowledge graph embeddings."""
+        raise NotImplementedError
 
     @abstractmethod
     def query_graph(self, limit: Optional[int] = None) -> Graph:

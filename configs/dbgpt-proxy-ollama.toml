@@ -19,7 +19,7 @@ password ="${env:MYSQL_PASSWORD:-Abcd1234}"
 
 [rag.storage]
 [rag.storage.vector]
-type = "Chroma"
+type = "chroma"
 persist_path = "pilot/data"
 
 # Model Configurations
