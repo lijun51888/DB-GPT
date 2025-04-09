@@ -307,6 +307,16 @@ class Service(
             system_app=self._system_app,
         )
         _vector_connector.delete_vector_name(vector_name)
+        
+        field_vector_name = db_config.db_name + "_profile_field"
+        field_vector_store_config = VectorStoreConfig(name=field_vector_name)
+        field_vector_connector = VectorStoreConnector(
+            vector_store_type=CFG.VECTOR_STORE_TYPE,
+            vector_store_config=field_vector_store_config,
+            system_app=self._system_app,
+        )
+        field_vector_connector.delete_vector_name(field_vector_name)
+        
         self._db_summary_client.db_summary_embedding(
             db_config.db_name, db_config.db_type
         )
