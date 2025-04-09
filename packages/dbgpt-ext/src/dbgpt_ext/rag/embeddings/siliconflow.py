@@ -137,3 +137,33 @@ register_embedding_adapter(
         )
     ],
 )
+
+register_embedding_adapter(
+    SiliconFlowEmbeddings,
+    supported_models=[
+        EmbeddingModelMetadata(
+            model="BAAI/bge-large-zh-v1.5",
+            dimension=1024,
+            context_length=512,
+            description=_(
+                "The embedding model is provided by SiliconFlow, supporting multiple "
+                "languages and high-quality text embeddings."
+            ),
+        )
+    ],
+)
+
+register_embedding_adapter(
+    SiliconFlowEmbeddings,
+    supported_models=[
+        EmbeddingModelMetadata(
+            model="BAAI/bge-large-en-v1.5",
+            dimension=1024,
+            context_length=512,
+            description=_(
+                "The embedding model is provided by SiliconFlow, supporting multiple "
+                "languages and high-quality text embeddings."
+            ),
+        )
+    ],
+)
