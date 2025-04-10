@@ -46,7 +46,6 @@ The important thing is: Please make sure to only return the json string, do not 
 """
 
 RESPONSE_FORMAT = [
-    
     {
         "thoughts": "Current thinking and value of data analysis",
         "showcase": "What type of charts to show",

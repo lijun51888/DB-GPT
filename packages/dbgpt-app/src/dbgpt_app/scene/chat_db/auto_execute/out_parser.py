@@ -132,7 +132,9 @@ class DbChatOutputParser(BaseOutputParser):
                 not prompt_response.direct_response
                 or len(prompt_response.direct_response) <= 0
             ) and (not prompt_response.sql or len(prompt_response.sql) <= 0):
-                raise AppActionException("出了点小状况，但别担心，我们正在努力解决，感谢你的耐心！", "#1")
+                raise AppActionException(
+                    "出了点小状况，但别担心，我们正在努力解决，感谢你的耐心！", "#1"
+                )
 
             if prompt_response.sql:
                 df = data(prompt_response.sql)
@@ -172,9 +174,7 @@ class DbChatOutputParser(BaseOutputParser):
         else:
             result = b""
         if not success:
-            view_content = (
-                f'<span style="color:red">ERROR!</span> {err_msg}'
-            )
+            view_content = f'<span style="color:red">ERROR!</span> {err_msg}'
             raise AppActionException(view_content, "#2")
         else:
             return speak + "\n" + result.decode("utf-8")

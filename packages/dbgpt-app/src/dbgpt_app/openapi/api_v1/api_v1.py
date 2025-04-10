@@ -507,15 +507,14 @@ async def chat_completions(
     )
     dialogue.user_name = user_token.user_id if user_token else dialogue.user_name
     from dbgpt.storage.chat_history.chat_history_db import ChatHistoryDao
+
     chat_history_info = ChatHistoryDao().get_by_uid(dialogue.conv_uid)
     if chat_history_info is not None:
         if chat_history_info.app_code is not None:
             dialogue.app_code = chat_history_info.app_code
     if dialogue.app_code is None:
         dialogue.app_code = dialogue.chat_mode
-    logger.info(
-        f"chat_completions:app_code={dialogue.app_code}"
-    )
+    logger.info(f"chat_completions:app_code={dialogue.app_code}")
     dialogue = adapt_native_app_model(dialogue)
     headers = {
         "Content-Type": "text/event-stream",

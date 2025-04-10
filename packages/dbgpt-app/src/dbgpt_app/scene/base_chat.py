@@ -1,7 +1,7 @@
 import datetime
+import json
 import logging
 import traceback
-import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, AsyncIterator, Dict, Optional, Type, TypeVar, Union
@@ -85,9 +85,9 @@ def _build_conversation(
     return StorageConversation(
         chat_param.chat_session_id,
         chat_mode=chat_mode.value(),
-        user_name=chat_param.get("user_name"),
-        sys_code=chat_param.get("sys_code"),
-        app_code=chat_param.get("app_code"),
+        user_name=chat_param.user_name,
+        sys_code=chat_param.sys_code,
+        app_code=chat_param.app_code,
         model_name=model_name,
         param_type=param_type,
         param_value=param_value,
@@ -104,12 +104,14 @@ RESPONSE_FORMAT_SIMPLE = {
     "display_type": "Data display method",
 }
 
-RESPONSE_FORMAT_DASHBOARD  = {
+RESPONSE_FORMAT_DASHBOARD = {
     "thoughts": "Current thinking and value of data analysis",
     "showcase": "What type of charts to show",
     "sql": "data analysis SQL",
     "title": "Data Analysis Title",
 }
+
+
 class BaseChat(ABC):
     """DB-GPT Chat Service Base Module
     Include:
@@ -138,7 +140,6 @@ class BaseChat(ABC):
             - model_name:(str) llm model name
             - select_param:(str) select param
         """
-        logger.info(f"chat_mode: {chat_param['chat_mode']}")
         logger.info(f"chat_param: {chat_param}")
         self.system_app = system_app
         self.app_config = self.system_app.config.configs.get("app_config")
