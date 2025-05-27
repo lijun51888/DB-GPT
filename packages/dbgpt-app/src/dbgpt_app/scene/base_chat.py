@@ -18,7 +18,16 @@ from dbgpt.core import (
     ModelRequestContext,
     SystemPromptTemplate,
 )
-from dbgpt.core.interface.message import StorageConversation
+from dbgpt.core.interface.file import FileStorageClient
+from dbgpt.core.interface.media import MediaContent
+from dbgpt.core.interface.message import (
+    HumanMessage,
+    ModelMessage,
+    StorageConversation,
+)
+from dbgpt.core.schema.types import (
+    ChatCompletionUserMessageParam,
+)
 from dbgpt.model import DefaultLLMClient
 from dbgpt.model.cluster import WorkerManagerFactory
 from dbgpt.util import get_or_create_event_loop
@@ -34,6 +43,7 @@ from dbgpt_app.scene.operators.app_operator import (
 )
 from dbgpt_serve.conversation.serve import Serve as ConversationServe
 from dbgpt_serve.core.config import BufferWindowGPTsAppMemoryConfig, GPTsAppCommonConfig
+from dbgpt_serve.file.serve import Serve as FileServe
 from dbgpt_serve.prompt.service.service import Service as PromptService
 
 from .exceptions import BaseAppException, ContextAppException
@@ -47,7 +57,7 @@ C = TypeVar("C", bound="GPTsAppCommonConfig")
 @dataclass
 class ChatParam:
     chat_session_id: str
-    current_user_input: str
+    current_user_input: Union[str, ChatCompletionUserMessageParam]
     model_name: str
     select_param: Any
     chat_mode: ChatScene
@@ -68,6 +78,11 @@ class ChatParam:
         if not isinstance(self.app_config, type_class):
             return type_class(**self.app_config.to_dict())
         return self.app_config
+
+    def real_user_input(self) -> HumanMessage:
+        return HumanMessage.parse_chat_completion_message(
+            self.current_user_input, ignore_unknown_media=True
+        )
 
 
 def _build_conversation(
@@ -147,7 +162,7 @@ class BaseChat(ABC):
         self.model_config = self.app_config.models
         self.chat_session_id = chat_param.chat_session_id
         self.chat_mode = chat_param.chat_mode
-        self.current_user_input: str = chat_param.current_user_input
+        self.current_user_input: HumanMessage = chat_param.real_user_input()
         self.llm_model = (
             chat_param.model_name
             if chat_param.model_name
@@ -181,10 +196,20 @@ class BaseChat(ABC):
             chat_prompt_template = ChatPromptTemplate(
                 messages=[
                     SystemPromptTemplate.from_template(
-                        prompt_template.template,
-                        response_format=json.dumps(
-                            response_format_simple, ensure_ascii=False, indent=4
+                        # prompt_template.template,
+                        # response_format=json.dumps(
+                        #     response_format_simple, ensure_ascii=False, indent=4
+                        # ),
+                        template=prompt_template.template,
+                        template_format=prompt_template.template_format,
+                        response_format=(
+                            prompt_template.response_format
+                            if prompt_template.response_format
+                            and prompt_template.response_format != "{}"
+                            else None
                         ),
+                        response_key=prompt_template.response_key,
+                        template_is_strict=prompt_template.template_is_strict,
                     ),
                     MessagesPlaceholder(variable_name="chat_history"),
                     HumanPromptTemplate.from_template("{user_input}"),
@@ -197,6 +222,7 @@ class BaseChat(ABC):
                 output_parser=self.prompt_template.output_parser,
             )
         self._conv_serve = ConversationServe.get_instance(self.system_app)
+        self._file_serve = FileServe.get_instance(self.system_app)
         self.current_message: StorageConversation = _build_conversation(
             self.chat_mode, chat_param, self.llm_model, self._conv_serve
         )
@@ -213,8 +239,8 @@ class BaseChat(ABC):
         # will be compatible with all models
         self._message_version = chat_param.message_version
         self._chat_param = chat_param
+        self.fs_client = FileStorageClient.get_instance(system_app)
 
-    @abstractmethod
     async def generate_input_values(self) -> Dict:
         """Generate input to LLM
 
@@ -223,6 +249,31 @@ class BaseChat(ABC):
         Returns:
             a dictionary to be formatted by prompt template
         """
+        return self.parse_user_input()
+
+    async def prepare_input_values(self) -> Dict:
+        """Generate input value compatible with custom prompt to LLM
+
+        Please note that you must not perform any blocking operations in this function
+
+        Returns:
+            a dictionary to be formatted by prompt template
+        """
+        input_values = await self.generate_input_values()
+
+        # Mapping variable names: compatible with custom prompt template variable names
+        # Get the input_variables of the current prompt
+        input_variables = []
+        if hasattr(self.prompt_template, "prompt") and hasattr(
+            self.prompt_template.prompt, "input_variables"
+        ):
+            input_variables = self.prompt_template.prompt.input_variables
+        # Compatible with question and user_input
+        if "question" in input_variables and "question" not in input_values:
+            input_values["question"] = self.current_user_input
+        if "user_input" in input_variables and "user_input" not in input_values:
+            input_values["user_input"] = self.current_user_input
+        return input_values
 
     @property
     def llm_client(self) -> LLMClient:
@@ -313,12 +364,23 @@ class BaseChat(ABC):
             return self._chat_param.app_config.memory
         return BufferWindowGPTsAppMemoryConfig()
 
+    def parse_user_input(self) -> Dict[str, Any]:
+        """Parse user input to a dictionary.
+
+        Returns:
+            Dict[str, Any]: parsed user input
+        """
+        user_params = {"input": self.current_user_input.last_text}
+        if self.current_user_input.has_media:
+            user_params["media_input"] = [self.current_user_input]
+        return user_params
+
     async def _build_model_request(self) -> ModelRequest:
-        input_values = await self.generate_input_values()
+        input_values = await self.prepare_input_values()
         # Load history
         self.history_messages = self.current_message.get_history_message()
         self.current_message.start_new_round()
-        self.current_message.add_user_message(self.current_user_input)
+        self.current_message.add_user_message(self.current_user_input.content)
         self.current_message.start_date = datetime.datetime.now().strftime(
             "%Y-%m-%d %H:%M:%S"
         )
@@ -349,6 +411,12 @@ class BaseChat(ABC):
         )
         model_request: ModelRequest = await node.call(call_data=node_input)
         model_request.context.cache_enable = self.model_cache_enable
+        if model_request.messages:
+            for msg in model_request.messages:
+                if isinstance(msg, ModelMessage) and isinstance(msg.content, list):
+                    msg.content = MediaContent.replace_url(
+                        msg.content, self._file_serve.replace_uri
+                    )
         return model_request
 
     def stream_plugin_call(self, text):
@@ -605,7 +673,7 @@ class BaseChat(ABC):
         return prompt_define_response
 
     def _blocking_stream_call(self):
-        logger.warn(
+        logger.warning(
             "_blocking_stream_call is only temporarily used in webserver and will be "
             "deleted soon, please use stream_call to replace it for higher performance"
         )

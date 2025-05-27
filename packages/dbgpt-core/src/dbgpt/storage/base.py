@@ -1,5 +1,6 @@
 """Index store base class."""
 
+import asyncio
 import logging
 import time
 from abc import ABC, abstractmethod
@@ -27,9 +28,16 @@ class IndexStoreConfig(BaseParameters):
 class IndexStoreBase(ABC):
     """Index store base class."""
 
-    def __init__(self, executor: Optional[Executor] = None):
+    def __init__(
+        self,
+        executor: Optional[Executor] = None,
+        max_chunks_once_load: Optional[int] = None,
+        max_threads: Optional[int] = None,
+    ):
         """Init index store."""
         self._executor = executor or ThreadPoolExecutor()
+        self._max_chunks_once_load = max_chunks_once_load or 10
+        self._max_threads = max_threads or 1
 
     @abstractmethod
     def get_config(self) -> IndexStoreConfig:
@@ -102,7 +110,10 @@ class IndexStoreBase(ABC):
         return True
 
     def load_document_with_limit(
-        self, chunks: List[Chunk], max_chunks_once_load: int = 10, max_threads: int = 1
+        self,
+        chunks: List[Chunk],
+        max_chunks_once_load: Optional[int] = None,
+        max_threads: Optional[int] = None,
     ) -> List[str]:
         """Load document in index database with specified limit.
 
@@ -114,6 +125,8 @@ class IndexStoreBase(ABC):
         Return:
             List[str]: Chunk ids.
         """
+        max_chunks_once_load = max_chunks_once_load or self._max_chunks_once_load
+        max_threads = max_threads or self._max_threads
         # Group the chunks into chunks of size max_chunks
         chunk_groups = [
             chunks[i : i + max_chunks_once_load]
@@ -141,7 +154,10 @@ class IndexStoreBase(ABC):
         return ids
 
     async def aload_document_with_limit(
-        self, chunks: List[Chunk], max_chunks_once_load: int = 10, max_threads: int = 1
+        self,
+        chunks: List[Chunk],
+        max_chunks_once_load: Optional[int] = None,
+        max_threads: Optional[int] = None,
     ) -> List[str]:
         """Load document in index database with specified limit.
 
@@ -153,6 +169,8 @@ class IndexStoreBase(ABC):
         Return:
             List[str]: Chunk ids.
         """
+        max_chunks_once_load = max_chunks_once_load or self._max_chunks_once_load
+        max_threads = max_threads or self._max_threads
         chunk_groups = [
             chunks[i : i + max_chunks_once_load]
             for i in range(0, len(chunks), max_chunks_once_load)
@@ -165,18 +183,28 @@ class IndexStoreBase(ABC):
         for chunk_group in chunk_groups:
             tasks.append(self.aload_document(chunk_group))
 
-        import asyncio
-
-        results = await asyncio.gather(*tasks)
+        results = await self._run_tasks_with_concurrency(tasks, max_threads)
 
         ids = []
         loaded_cnt = 0
-        for success_ids in results:
+        for idx, success_ids in enumerate(results):
+            if isinstance(success_ids, Exception):
+                raise RuntimeError(
+                    f"Failed to load chunk group {idx + 1}: {str(success_ids)}"
+                ) from success_ids
             ids.extend(success_ids)
             loaded_cnt += len(success_ids)
             logger.info(f"Loaded {loaded_cnt} chunks, total {len(chunks)} chunks.")
 
         return ids
+
+    async def _run_tasks_with_concurrency(self, tasks, max_concurrent):
+        results = []
+        for i in range(0, len(tasks), max_concurrent):
+            batch = tasks[i : i + max_concurrent]
+            batch_results = await asyncio.gather(*batch, return_exceptions=True)
+            results.extend(batch_results)
+        return results
 
     def similar_search(
         self, text: str, topk: int, filters: Optional[MetadataFilters] = None
@@ -214,3 +242,44 @@ class IndexStoreBase(ABC):
         return await blocking_func_to_async_no_executor(
             self.similar_search_with_scores, query, topk, score_threshold, filters
         )
+
+    def full_text_search(
+        self, text: str, topk: int, filters: Optional[MetadataFilters] = None
+    ) -> List[Chunk]:
+        """Full text search in index database.
+
+        Args:
+            text(str): The query text.
+            topk(int): The number of similar documents to return.
+            filters(Optional[MetadataFilters]): metadata filters.
+        Return:
+            List[Chunk]: The similar documents.
+        """
+        raise NotImplementedError(
+            "Full text search is not supported in this index store."
+        )
+
+    async def afull_text_search(
+        self, text: str, topk: int, filters: Optional[MetadataFilters] = None
+    ) -> List[Chunk]:
+        """Similar search in index database.
+
+        Args:
+            text(str): The query text.
+            topk(int): The number of similar documents to return.
+            filters(Optional[MetadataFilters]): metadata filters.
+        Return:
+            List[Chunk]: The similar documents.
+        """
+        return await blocking_func_to_async_no_executor(
+            self.full_text_search, text, topk, filters
+        )
+
+    def is_support_full_text_search(self) -> bool:
+        """Support full text search.
+
+        Return:
+            bool: The similar documents.
+        """
+        logger.warning("Full text search is not supported in this index store.")
+        return False
