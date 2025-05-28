@@ -190,9 +190,9 @@ class BaseChat(ABC):
             # adapt prompt template according to the prompt code
             prompt_template = self._prompt_service.get_template(self.prompt_code)
             logger.info(f"prompt_template: \n{prompt_template}")
-            response_format_simple = RESPONSE_FORMAT_SIMPLE
-            if self.chat_mode == ChatScene.ChatDashboard:
-                response_format_simple = RESPONSE_FORMAT_DASHBOARD
+            # response_format_simple = RESPONSE_FORMAT_SIMPLE
+            # if self.chat_mode == ChatScene.ChatDashboard:
+            #     response_format_simple = RESPONSE_FORMAT_DASHBOARD
             chat_prompt_template = ChatPromptTemplate(
                 messages=[
                     SystemPromptTemplate.from_template(
